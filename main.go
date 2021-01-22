@@ -1,3 +1,4 @@
+// Simple package that illustrates basic usage of echo
 package main
 
 import (
