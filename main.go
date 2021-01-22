@@ -3,6 +3,8 @@ package main
 
 import (
 	"fmt"
+	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo"
 )
@@ -12,6 +14,8 @@ func main() {
 	e := echo.New()
 
 	e.GET("/", HelloHandler)
+	e.GET("/product", GetProductsHandler)
+	e.GET("/product/:id", GetProductByIDHandler)
 
 	// Port, handle error
 	err := e.Start(":8080")
@@ -24,9 +28,33 @@ func main() {
 	// e.Logger.Fatal(e.Start(":8080"))
 }
 
+var products = map[int]string{
+	1: "car",
+	2: "computer",
+	3: "phone",
+}
+
 // very simple hello handler with string
 // Try with POST and see that it doesn't work
 func HelloHandler(c echo.Context) error {
 	return c.String(200, "HELLO")
 	// return c.String(http.StatusOK, "HELLO")
+}
+
+func GetProductsHandler(c echo.Context) error {
+	return c.JSON(http.StatusOK, products)
+}
+
+func GetProductByIDHandler(c echo.Context) error {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	product, exists := products[id]
+	if exists {
+		return c.JSON(http.StatusOK, product)
+	}
+
+	return c.JSON(http.StatusNotFound, fmt.Sprintf("Product for id: %d does not exist", id))
 }
