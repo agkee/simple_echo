@@ -16,6 +16,7 @@ func main() {
 	e.GET("/", HelloHandler)
 	e.GET("/product", GetProductsHandler)
 	e.GET("/product/:id", GetProductByIDHandler)
+	e.POST("/product", AddProductHandler)
 
 	// Port, handle error
 	err := e.Start(":8080")
@@ -57,4 +58,20 @@ func GetProductByIDHandler(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusNotFound, fmt.Sprintf("Product for id: %d does not exist", id))
+}
+
+func AddProductHandler(c echo.Context) error {
+	type Body struct {
+		Name string `json:"product_name"`
+	}
+
+	var reqBody Body
+	// Binds the request body with provided type
+	err := c.Bind(&reqBody)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	products[len(products)+1] = reqBody.Name
+	return c.JSON(http.StatusOK, products)
 }
