@@ -41,6 +41,7 @@ func main() {
 	e.GET("/product/:id", GetProductByIDHandler)
 	e.POST("/product", AddProductHandler)
 	e.PUT("/product/:id", UpdateProductHandler)
+	e.DELETE("/product/:id", DeleteProductHandler)
 
 	// Port, handle error
 	err := e.Start(":8080")
@@ -134,6 +135,19 @@ func UpdateProductHandler(c echo.Context) error {
 	_, exists := products[id]
 	if exists {
 		products[id] = reqBody.Name
+		return c.JSON(http.StatusOK, products)
+	}
+	return c.JSON(http.StatusBadRequest, "Product does not exist")
+}
+
+func DeleteProductHandler(c echo.Context) error {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+	_, exists := products[id]
+	if exists {
+		delete(products, id)
 		return c.JSON(http.StatusOK, products)
 	}
 	return c.JSON(http.StatusBadRequest, "Product does not exist")
