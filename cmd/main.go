@@ -2,11 +2,18 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"simple-echo/internal/db"
 	"simple-echo/internal/web"
 
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo"
+	log "github.com/sirupsen/logrus"
+)
+
+var (
+	connectionDSN = flag.String("dsn", "root:1234@tcp(localhost:3306)/products?parseTime=true", "Database string")
 )
 
 type ProductValidator struct {
@@ -18,6 +25,14 @@ func (p *ProductValidator) Validate(i interface{}) error {
 }
 
 func main() {
+	flag.Parse()
+
+	_, err := db.GetDB(*connectionDSN)
+	if err != nil {
+		log.WithError(err).Error("Can't create db connection")
+		return
+	}
+
 	// Pointer to echo
 	e := echo.New()
 	v := validator.New()
@@ -26,7 +41,7 @@ func main() {
 	web.SetRoutes(e)
 
 	// Port, handle error
-	err := e.Start(":8080")
+	err = e.Start(":8080")
 	if err != nil {
 		fmt.Println(err)
 	}
