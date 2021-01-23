@@ -10,9 +10,19 @@ import (
 	"github.com/labstack/echo"
 )
 
+type ProductValidator struct {
+	validator *validator.Validate
+}
+
+func (p *ProductValidator) Validate(i interface{}) error {
+	return p.validator.Struct(i)
+}
+
 func main() {
 	// Pointer to echo
 	e := echo.New()
+	v := validator.New()
+	e.Validator = &ProductValidator{validator: v}
 
 	e.GET("/", HelloHandler)
 	e.GET("/product", GetProductsHandler)
@@ -81,6 +91,13 @@ func AddProductHandler(c echo.Context) error {
 	var reqBody Body
 	// Binds the request body with provided type
 	err := c.Bind(&reqBody)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	// Validator not registered
+	// Register at top
+	err = c.Validate(reqBody)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
