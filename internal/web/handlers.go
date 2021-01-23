@@ -1,5 +1,4 @@
-// Simple package that illustrates basic usage of echo
-package main
+package web
 
 import (
 	"fmt"
@@ -9,10 +8,6 @@ import (
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo"
 )
-
-type ProductValidator struct {
-	validator *validator.Validate
-}
 
 // Validation struct
 type Body struct {
@@ -24,34 +19,6 @@ type Body struct {
 	// Website         string `json:"website" validate:"url"`
 	// Country         string `json:"country" validate:"len=2"`
 	// DefaultDeviceIP string `json:"default_device_ip" validate:"ip"`
-}
-
-func (p *ProductValidator) Validate(i interface{}) error {
-	return p.validator.Struct(i)
-}
-
-func main() {
-	// Pointer to echo
-	e := echo.New()
-	v := validator.New()
-	e.Validator = &ProductValidator{validator: v}
-
-	e.GET("/", HelloHandler)
-	e.GET("/product", GetProductsHandler)
-	e.GET("/product/:id", GetProductByIDHandler)
-	e.POST("/product", AddProductHandler)
-	e.PUT("/product/:id", UpdateProductHandler)
-	e.DELETE("/product/:id", DeleteProductHandler)
-
-	// Port, handle error
-	err := e.Start(":8080")
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	// e.Logger.Print("Listening on port 8080")
-	// Log and print the error
-	// e.Logger.Fatal(e.Start(":8080"))
 }
 
 var products = map[int]string{
