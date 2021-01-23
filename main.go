@@ -14,6 +14,18 @@ type ProductValidator struct {
 	validator *validator.Validate
 }
 
+// Validation struct
+type Body struct {
+	Name string `json:"name" validate:"required,min=4"`
+	// Name string `json:"name" validate:"required,min=4,email"`
+	// Vendor string `json:"vendor" validate:"min=4,max=10"`
+	// // If something isprovided with vendor, email should also be provided
+	// Email           string `json:"email" validate:"required_with=Vendor,email"`
+	// Website         string `json:"website" validate:"url"`
+	// Country         string `json:"country" validate:"len=2"`
+	// DefaultDeviceIP string `json:"default_device_ip" validate:"ip"`
+}
+
 func (p *ProductValidator) Validate(i interface{}) error {
 	return p.validator.Struct(i)
 }
@@ -28,6 +40,7 @@ func main() {
 	e.GET("/product", GetProductsHandler)
 	e.GET("/product/:id", GetProductByIDHandler)
 	e.POST("/product", AddProductHandler)
+	e.PUT("/product/:id", UpdateProductHandler)
 
 	// Port, handle error
 	err := e.Start(":8080")
@@ -76,18 +89,6 @@ func AddProductHandler(c echo.Context) error {
 	// returns validate, a struct for validation
 	v := validator.New()
 
-	// Validation struct
-	type Body struct {
-		Name string `json:"name" validate:"required,min=4"`
-		// Name string `json:"name" validate:"required,min=4,email"`
-		// Vendor string `json:"vendor" validate:"min=4,max=10"`
-		// // If something isprovided with vendor, email should also be provided
-		// Email           string `json:"email" validate:"required_with=Vendor,email"`
-		// Website         string `json:"website" validate:"url"`
-		// Country         string `json:"country" validate:"len=2"`
-		// DefaultDeviceIP string `json:"default_device_ip" validate:"ip"`
-	}
-
 	var reqBody Body
 	// Binds the request body with provided type
 	err := c.Bind(&reqBody)
@@ -115,3 +116,25 @@ func AddProductHandler(c echo.Context) error {
 }
 
 // go get github.com/go-playground/validator/v10
+
+func UpdateProductHandler(c echo.Context) error {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+	var reqBody Body
+
+	if err = c.Bind(&reqBody); err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	if err = c.Validate(reqBody); err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+
+	_, exists := products[id]
+	if exists {
+		products[id] = reqBody.Name
+		return c.JSON(http.StatusOK, products)
+	}
+	return c.JSON(http.StatusBadRequest, "Product does not exist")
+}
