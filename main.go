@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/go-playground/validator"
 	"github.com/labstack/echo"
 )
 
@@ -61,8 +62,20 @@ func GetProductByIDHandler(c echo.Context) error {
 }
 
 func AddProductHandler(c echo.Context) error {
+	// go get github.com/go-playground/validator/v10
+	// returns validate, a struct for validation
+	v := validator.New()
+
+	// Validation struct
 	type Body struct {
-		Name string `json:"product_name"`
+		Name string `json:"name" validate:"required,min=4"`
+		// Name string `json:"name" validate:"required,min=4,email"`
+		// Vendor string `json:"vendor" validate:"min=4,max=10"`
+		// // If something isprovided with vendor, email should also be provided
+		// Email           string `json:"email" validate:"required_with=Vendor,email"`
+		// Website         string `json:"website" validate:"url"`
+		// Country         string `json:"country" validate:"len=2"`
+		// DefaultDeviceIP string `json:"default_device_ip" validate:"ip"`
 	}
 
 	var reqBody Body
@@ -72,6 +85,16 @@ func AddProductHandler(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
+	// Validate after you do the binding
+	err = v.Struct(reqBody)
+	if err != nil {
+		// Same as
+		// return err
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
 	products[len(products)+1] = reqBody.Name
 	return c.JSON(http.StatusOK, products)
 }
+
+// go get github.com/go-playground/validator/v10
