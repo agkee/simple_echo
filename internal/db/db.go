@@ -18,6 +18,12 @@ var (
 	db *sql.DB
 )
 
+type Book struct {
+	ID        string `db:"id"`
+	Title     string `db:"name"`
+	CreatedAt string `db:string`
+}
+
 func GetDB(connString string) (*sql.DB, error) {
 	if db == nil {
 		log.Println("Creating a new connection...")

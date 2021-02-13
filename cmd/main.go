@@ -13,7 +13,8 @@ import (
 )
 
 var (
-	connectionDSN = flag.String("dsn", "root:1234@tcp(localhost:3306)/products?parseTime=true", "Database string")
+	connectionDSN = flag.String("dsn", "root:test@tcp(library_db:3306)/library_db?parseTime=true", "Database string")
+	// connectionDSN = flag.String("dsn", "root:test@tcp(localhost:3306)/products?parseTime=true", "Database string")
 )
 
 type ProductValidator struct {
